@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>copilot_agent</name>
+  <version>0.0.1</version>
+  <description>Layer 2 (brain): LLM agent that reasons and calls tools mapped to ROS2 interfaces (RAG service, executor action).</description>
+  <maintainer email="batmantwo7233@gmail.com">bong</maintainer>
+  <license>MIT</license>
+
+  <depend>rclpy</depend>
+  <depend>copilot_msgs</depend>
+
+  <!-- Python dep (anthropic) via pip; see requirements.txt. -->
+
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

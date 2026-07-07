@@ -11,10 +11,12 @@ architecture, roadmap, and learning guide.
 | `copilot_py_demo` | Python (rclpy) | 0 | Publishes `Heartbeat` on `/copilot/heartbeat` |
 | `copilot_cpp_demo` | C++ (rclcpp) | 0 | Subscribes to `/copilot/heartbeat` |
 | `copilot_rag` | Python (rclpy) | 1 | 🟦 RAG knowledge assistant, service `/copilot_rag/query` |
+| `copilot_agent` | Python (rclpy) | 2 | 🟩 LLM agent brain, service `/copilot_agent/ask` |
+| `copilot_executor` | **C++ (rclcpp)** | 2 | 🟩 `ExecuteCommand` action server + safety validation |
 | `tools/llm_smoketest.py` | Python | 0 | Confirms the Claude API is reachable |
 
-Later phases add `copilot_agent`, `copilot_executor`, `copilot_wiki`, and
-`copilot_bringup` (see [ARCHITECTURE](../docs/ARCHITECTURE.md)).
+Later phases add `copilot_wiki` and `copilot_bringup`
+(see [ARCHITECTURE](../docs/ARCHITECTURE.md)).
 
 ## Phase 1 — RAG MVP 🟦
 
@@ -30,6 +32,15 @@ cd src/copilot_rag
 python3 -m copilot_rag.ingest data
 python3 -m copilot_rag.ask "Why does a large inflation_radius block a doorway?"
 ```
+
+## Phase 2 — AI Agent + C++ executor 🟩
+
+The agent (`copilot_agent`, Python) reasons with Claude and calls tools that map
+to ROS2 interfaces: `query_knowledge` → the RAG service, `navigate_to` → a **C++
+action server** (`copilot_executor`) that validates safety before moving. A **C++
+safety monitor** turns `/scan` obstacles into an e-stop that overrides any
+command. This is where the C++/Python balance lives — see
+[`src/copilot_agent/README.md`](src/copilot_agent/README.md).
 
 ## Prerequisites
 

@@ -13,6 +13,7 @@ find_package(action_msgs REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Heartbeat.msg"
   "srv/Query.srv"
+  "srv/Ask.srv"
   "action/ExecuteCommand.action"
   DEPENDENCIES geometry_msgs action_msgs
 )
