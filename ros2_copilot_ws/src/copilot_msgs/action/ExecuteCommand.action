@@ -1,0 +1,12 @@
+# Layer 2 (Agent -> Executor) action: run a high-level command safely.
+# Goal
+string command                 # human-readable command, e.g. "navigate_to"
+geometry_msgs/Pose target      # target pose (used by navigate_to)
+---
+# Result
+bool success
+string message
+---
+# Feedback
+string status                  # e.g. "validating", "navigating", "arrived"
+float32 progress               # 0.0 - 1.0

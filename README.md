@@ -35,6 +35,7 @@ Gazebo 시뮬레이션 위에서 돌아가는 ROS2 모바일 로봇을 두고, *
 
 ## 문서
 
+- 🧭 [**GuideForBong**](docs/GuideForBong.md) — *이 프로젝트가 정말 RAG/Agent/Wiki를 쓰나? 내가 뭘 배우나?* 에 대한 자세한 답 (여기부터 읽으세요)
 - 📐 [**아키텍처**](docs/ARCHITECTURE.md) — 노드 설계, C++/Python 분리, 데이터 흐름, 워크스페이스 구조
 - 🗺️ [**로드맵**](docs/ROADMAP.md) — Phase 0~5 단계별 빌드 & 학습 계획, "완료 기준"
 - 📚 [**학습 가이드**](docs/LEARNING_GUIDE.md) — RAG / Agent / LLM Wiki / ROS2 각각을 어떻게 익힐지 + 추천 자료
@@ -48,7 +49,12 @@ Gazebo 시뮬레이션 위에서 돌아가는 ROS2 모바일 로봇을 두고, *
 
 ## 시작하기
 
-이 레포는 현재 **설계·학습 청사진** 단계입니다. 먼저 [로드맵](docs/ROADMAP.md)의 Phase 0부터 순서대로 진행하세요.
+**Phase 0 스캐폴딩이 이미 들어있습니다.** [`ros2_copilot_ws/`](ros2_copilot_ws/)에 colcon 워크스페이스가 있어요:
+- `copilot_msgs` — C++/Python 양쪽에서 쓰는 커스텀 인터페이스
+- `copilot_py_demo` (rclpy) ⇄ `copilot_cpp_demo` (rclcpp) — 커스텀 메시지로 통신하는 데모
+- `tools/llm_smoketest.py` — Claude API 첫 호출 확인
+
+빌드·실행 방법은 [`ros2_copilot_ws/README.md`](ros2_copilot_ws/README.md)를 보세요. 그다음 [로드맵](docs/ROADMAP.md)의 Phase 1(RAG)로 진행합니다.
 
 ## 라이선스
 
