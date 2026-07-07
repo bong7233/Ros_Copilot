@@ -1,0 +1,8 @@
+{"question": "What is a ROS2 action used for?", "expected_source": "ros2_concepts.md", "must_include": ["feedback"], "unanswerable": false}
+{"question": "When should I use a service instead of a topic?", "expected_source": "ros2_concepts.md", "must_include": ["response"], "unanswerable": false}
+{"question": "Why can a large inflation_radius block a narrow doorway?", "expected_source": "nav2_costmap.md", "must_include": ["overlap"], "unanswerable": false}
+{"question": "Which parameters control the costmap inflation layer?", "expected_source": "nav2_costmap.md", "must_include": ["inflation_radius"], "unanswerable": false}
+{"question": "My subscriber receives no messages. What should I check first?", "expected_source": "ros2_qos.md", "must_include": ["qos"], "unanswerable": false}
+{"question": "What is the difference between RELIABLE and BEST_EFFORT reliability?", "expected_source": "ros2_qos.md", "must_include": ["deliver"], "unanswerable": false}
+{"question": "What does the static layer of a costmap contain?", "expected_source": "nav2_costmap.md", "must_include": ["map"], "unanswerable": false}
+{"question": "What is the battery capacity of this robot in amp-hours?", "expected_source": "", "must_include": [], "unanswerable": true}

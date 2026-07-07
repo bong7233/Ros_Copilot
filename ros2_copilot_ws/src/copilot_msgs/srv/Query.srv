@@ -1,0 +1,5 @@
+# Layer 1 (RAG) service: ask a question, get an answer grounded in sources.
+string question
+---
+string answer
+string[] sources    # citations / source document ids used for the answer

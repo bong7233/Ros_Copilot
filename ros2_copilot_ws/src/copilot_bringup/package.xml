@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>copilot_bringup</name>
+  <version>0.0.1</version>
+  <description>Phase 4: launch files and config to bring up the copilot nodes, and (in simulation) Gazebo + Nav2.</description>
+  <maintainer email="batmantwo7233@gmail.com">bong</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- copilot nodes launched together -->
+  <exec_depend>copilot_rag</exec_depend>
+  <exec_depend>copilot_agent</exec_depend>
+  <exec_depend>copilot_executor</exec_depend>
+  <exec_depend>copilot_wiki</exec_depend>
+
+  <!-- simulation stack (only needed for sim.launch.py) -->
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>turtlebot3_gazebo</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

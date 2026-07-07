@@ -1,0 +1,7 @@
+# Keep colcon build artifacts out of the Docker build context.
+ros2_copilot_ws/build/
+ros2_copilot_ws/install/
+ros2_copilot_ws/log/
+**/__pycache__/
+.git/
+.env

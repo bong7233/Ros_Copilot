@@ -1,0 +1,4 @@
+# Layer 2 (Agent) entry point: natural-language request in, reply out.
+string request
+---
+string reply

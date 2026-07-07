@@ -1,0 +1,20 @@
+# ROS2 / colcon build artifacts
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Secrets / local env — NEVER commit real keys
+.env
+*.local
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store

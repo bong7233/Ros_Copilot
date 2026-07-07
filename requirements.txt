@@ -1,0 +1,4 @@
+# Python deps for the AI layers (installed outside the ROS2 apt world, e.g. venv).
+anthropic>=0.40
+# Phase 1 (RAG):
+chromadb>=0.5
