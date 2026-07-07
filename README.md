@@ -55,7 +55,13 @@ Gazebo 시뮬레이션 위에서 돌아가는 ROS2 모바일 로봇을 두고, *
 - `copilot_py_demo` (rclpy) ⇄ `copilot_cpp_demo` (rclcpp) — 커스텀 메시지로 통신하는 데모
 - `tools/llm_smoketest.py` — Claude API 첫 호출 확인
 
-빌드·실행 방법은 [`ros2_copilot_ws/README.md`](ros2_copilot_ws/README.md)를 보세요. 그다음 [로드맵](docs/ROADMAP.md)의 Phase 1(RAG)로 진행합니다.
+빌드·실행 방법은 [`ros2_copilot_ws/README.md`](ros2_copilot_ws/README.md)를 보세요.
+
+**전체 구성 (Phase 0–6 구현됨):**
+- `ros2_copilot_ws/` — ROS2 워크스페이스 (RAG·Agent·Executor·Wiki·Bringup)
+- [`eval/`](eval/) — 평가 harness (RAG 정확도·안전 위반 0 검증) · Phase 5
+- [`web/`](web/) — 챗 웹 프론트엔드 (에이전트와 브라우저로 대화) · Phase 6
+- [`docker/`](docker/) — 어느 OS에서든 실행 가능한 컨테이너 환경
 
 ## 라이선스
 
