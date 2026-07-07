@@ -3,19 +3,33 @@
 The ROS2 Copilot source lives here. See the top-level [docs](../docs/) for the
 architecture, roadmap, and learning guide.
 
-## Phase 0 — what's here now
+## Packages so far
 
-| Package | Language | Role |
-|---|---|---|
-| `copilot_msgs` | interfaces (CMake) | Shared `msg` / `srv` / `action` definitions, built by both C++ and Python |
-| `copilot_py_demo` | Python (rclpy) | Publishes `Heartbeat` on `/copilot/heartbeat` |
-| `copilot_cpp_demo` | C++ (rclcpp) | Subscribes to `/copilot/heartbeat` |
-| `tools/llm_smoketest.py` | Python | Confirms the Claude API is reachable (LLM first call) |
+| Package | Language | Phase | Role |
+|---|---|---|---|
+| `copilot_msgs` | interfaces (CMake) | 0 | Shared `msg` / `srv` / `action`, built by C++ and Python |
+| `copilot_py_demo` | Python (rclpy) | 0 | Publishes `Heartbeat` on `/copilot/heartbeat` |
+| `copilot_cpp_demo` | C++ (rclcpp) | 0 | Subscribes to `/copilot/heartbeat` |
+| `copilot_rag` | Python (rclpy) | 1 | 🟦 RAG knowledge assistant, service `/copilot_rag/query` |
+| `tools/llm_smoketest.py` | Python | 0 | Confirms the Claude API is reachable |
 
-These demo packages prove the foundation: a **custom interface** built once and
-used from **both C++ and Python**, plus a working **LLM call**. Later phases add
-`copilot_rag`, `copilot_agent`, `copilot_executor`, `copilot_wiki`, and
+Later phases add `copilot_agent`, `copilot_executor`, `copilot_wiki`, and
 `copilot_bringup` (see [ARCHITECTURE](../docs/ARCHITECTURE.md)).
+
+## Phase 1 — RAG MVP 🟦
+
+`copilot_rag` retrieves relevant document chunks and has Claude answer grounded
+in them, with sources. It works **standalone (no ROS2 build)** or as a ROS2
+service. See [`src/copilot_rag/README.md`](src/copilot_rag/README.md) for the
+full walkthrough. Quick start:
+
+```bash
+pip install anthropic chromadb
+export ANTHROPIC_API_KEY=sk-ant-...
+cd src/copilot_rag
+python3 -m copilot_rag.ingest data
+python3 -m copilot_rag.ask "Why does a large inflation_radius block a doorway?"
+```
 
 ## Prerequisites
 
