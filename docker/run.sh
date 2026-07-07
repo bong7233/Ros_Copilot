@@ -1,29 +1,40 @@
 #!/usr/bin/env bash
 # Run the ROS2 Copilot container.
 #
-#   Headless (AI nodes, RAG, agent, Nav2 without GUI):
+#   Web demo (chat UI at http://localhost:8000) — easiest:
+#       ANTHROPIC_API_KEY=sk-ant-... ./docker/run.sh web
+#
+#   Headless shell (RAG, agent, eval — no GUI):
 #       ANTHROPIC_API_KEY=sk-ant-... ./docker/run.sh
 #
-#   With Gazebo/RViz GUI on a Linux host with X11:
+#   GUI shell (Gazebo/RViz on a Linux host with X11):
 #       xhost +local:docker
 #       ANTHROPIC_API_KEY=sk-ant-... ./docker/run.sh gui
 #
-# On Windows/macOS, GUI needs an X server (VcXsrv / XQuartz) or use WSLg on
-# Windows 11. See docs/ENVIRONMENT.md.
+# On Windows/macOS the GUI mode needs an X server (or Win11 WSLg). The `web`
+# mode works everywhere. See docs/HOW_TO_RUN.md.
 set -euo pipefail
 
 IMAGE="robo-copilot"
 MODE="${1:-headless}"
+KEY="${ANTHROPIC_API_KEY:-}"
 
-COMMON=(--rm -it
-  -e "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}"
-  --net=host)
-
-if [[ "$MODE" == "gui" ]]; then
-  exec docker run "${COMMON[@]}" \
-    -e "DISPLAY=${DISPLAY:-:0}" \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    "$IMAGE" bash
-else
-  exec docker run "${COMMON[@]}" "$IMAGE" bash
-fi
+case "$MODE" in
+  web)
+    exec docker run --rm -it -p 8000:8000 \
+      -e "ANTHROPIC_API_KEY=$KEY" \
+      "$IMAGE" bash /app/docker/web-demo.sh
+    ;;
+  gui)
+    exec docker run --rm -it --net=host \
+      -e "ANTHROPIC_API_KEY=$KEY" \
+      -e "DISPLAY=${DISPLAY:-:0}" \
+      -v /tmp/.X11-unix:/tmp/.X11-unix \
+      "$IMAGE" bash
+    ;;
+  *)
+    exec docker run --rm -it \
+      -e "ANTHROPIC_API_KEY=$KEY" \
+      "$IMAGE" bash
+    ;;
+esac
