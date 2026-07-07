@@ -13,10 +13,11 @@ architecture, roadmap, and learning guide.
 | `copilot_rag` | Python (rclpy) | 1 | 🟦 RAG knowledge assistant, service `/copilot_rag/query` |
 | `copilot_agent` | Python (rclpy) | 2 | 🟩 LLM agent brain, service `/copilot_agent/ask` |
 | `copilot_executor` | **C++ (rclcpp)** | 2 | 🟩 `ExecuteCommand` action server + safety validation |
+| `copilot_wiki` | Python (rclpy) | 3 | 🟨 auto-generate grounded docs from the ROS2 graph |
 | `tools/llm_smoketest.py` | Python | 0 | Confirms the Claude API is reachable |
 
-Later phases add `copilot_wiki` and `copilot_bringup`
-(see [ARCHITECTURE](../docs/ARCHITECTURE.md)).
+Later phases add `copilot_bringup` (Gazebo + Nav2 integration, Phase 4)
+and evaluation (Phase 5) — see [ARCHITECTURE](../docs/ARCHITECTURE.md).
 
 ## Phase 1 — RAG MVP 🟦
 
@@ -41,6 +42,20 @@ action server** (`copilot_executor`) that validates safety before moving. A **C+
 safety monitor** turns `/scan` obstacles into an e-stop that overrides any
 command. This is where the C++/Python balance lives — see
 [`src/copilot_agent/README.md`](src/copilot_agent/README.md).
+
+## Phase 3 — LLM Wiki 🟨
+
+`copilot_wiki` introspects the **live ROS2 graph** and auto-generates grounded
+Markdown docs: a mermaid node graph (built deterministically from the facts) plus
+one LLM-written page per node. Run the system, then
+`ros2 run copilot_wiki generate --out docs/generated` (or `--dry-run` to see the
+raw facts). See [`src/copilot_wiki/README.md`](src/copilot_wiki/README.md).
+
+## Phase 4+ — needs local simulation
+
+Phase 4 (Gazebo + Nav2 end-to-end) and Phase 5 (evaluation) are best developed
+against a running simulator on your machine. The `copilot_executor` mock motion
+is where real Nav2 `NavigateToPose` plugs in.
 
 ## Prerequisites
 
