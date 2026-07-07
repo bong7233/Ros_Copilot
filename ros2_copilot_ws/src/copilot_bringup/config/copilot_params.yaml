@@ -1,0 +1,18 @@
+# Optional parameter overrides for the copilot nodes.
+# Load with: ros2 run copilot_executor executor --ros-args --params-file <this>
+# (the launch files use inline params; this file is a convenient central place to
+#  tune values once you're iterating in simulation.)
+
+copilot_executor:
+  ros__parameters:
+    use_nav2: true
+    # Safety bounds (meters, map frame). Goals outside are rejected before motion.
+    bounds_min_x: -10.0
+    bounds_max_x: 10.0
+    bounds_min_y: -10.0
+    bounds_max_y: 10.0
+
+copilot_safety_monitor:
+  ros__parameters:
+    # Emergency-stop distance (meters). Closer than this on /scan -> e-stop.
+    min_distance: 0.4

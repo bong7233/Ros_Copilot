@@ -12,10 +12,11 @@ find_package(copilot_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
 
 add_executable(executor src/executor.cpp)
 ament_target_dependencies(executor
-  rclcpp rclcpp_action copilot_msgs std_msgs geometry_msgs)
+  rclcpp rclcpp_action copilot_msgs std_msgs geometry_msgs nav2_msgs)
 
 add_executable(safety_monitor src/safety_monitor.cpp)
 ament_target_dependencies(safety_monitor

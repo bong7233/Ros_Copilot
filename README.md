@@ -36,6 +36,7 @@ Gazebo 시뮬레이션 위에서 돌아가는 ROS2 모바일 로봇을 두고, *
 ## 문서
 
 - 🧭 [**GuideForBong**](docs/GuideForBong.md) — *이 프로젝트가 정말 RAG/Agent/Wiki를 쓰나? 내가 뭘 배우나?* 에 대한 자세한 답 (여기부터 읽으세요)
+- 🖥️ [**실행 환경 가이드**](docs/ENVIRONMENT.md) — 윈도우/리눅스/Docker에서 어떻게 돌리나, 실행 형태(분산 시스템 vs 웹앱)
 - 📐 [**아키텍처**](docs/ARCHITECTURE.md) — 노드 설계, C++/Python 분리, 데이터 흐름, 워크스페이스 구조
 - 🗺️ [**로드맵**](docs/ROADMAP.md) — Phase 0~5 단계별 빌드 & 학습 계획, "완료 기준"
 - 📚 [**학습 가이드**](docs/LEARNING_GUIDE.md) — RAG / Agent / LLM Wiki / ROS2 각각을 어떻게 익힐지 + 추천 자료

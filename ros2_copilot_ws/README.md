@@ -14,10 +14,12 @@ architecture, roadmap, and learning guide.
 | `copilot_agent` | Python (rclpy) | 2 | 🟩 LLM agent brain, service `/copilot_agent/ask` |
 | `copilot_executor` | **C++ (rclcpp)** | 2 | 🟩 `ExecuteCommand` action server + safety validation |
 | `copilot_wiki` | Python (rclpy) | 3 | 🟨 auto-generate grounded docs from the ROS2 graph |
+| `copilot_bringup` | launch (CMake) | 4 | launch files; Gazebo + Nav2 + copilot integration |
 | `tools/llm_smoketest.py` | Python | 0 | Confirms the Claude API is reachable |
 
-Later phases add `copilot_bringup` (Gazebo + Nav2 integration, Phase 4)
-and evaluation (Phase 5) — see [ARCHITECTURE](../docs/ARCHITECTURE.md).
+Phase 5 (evaluation) is next — see [ARCHITECTURE](../docs/ARCHITECTURE.md). For how
+to get a working ROS2/Gazebo environment (Ubuntu / WSL2 / Docker) see
+[docs/ENVIRONMENT.md](../docs/ENVIRONMENT.md).
 
 ## Phase 1 — RAG MVP 🟦
 
