@@ -33,10 +33,13 @@ jobs:
     container: ros:humble
     steps:
       - uses: actions/checkout@v4
-      - name: Install ROS dependencies
+      - name: Install build tools + ROS dependencies
         shell: bash
         run: |
           apt-get update
+          # ros:humble is ros-base and may lack colcon / compilers.
+          apt-get install -y --no-install-recommends \
+            python3-colcon-common-extensions build-essential cmake git
           rosdep update
           rosdep install --from-paths ros2_copilot_ws/src --ignore-src -r -y \
             --skip-keys "nav2_bringup turtlebot3_gazebo"
