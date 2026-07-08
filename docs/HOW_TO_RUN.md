@@ -59,16 +59,16 @@
 
 ### 4-2. 프로젝트 코드 내려받기
 가장 쉬운 방법(깃 몰라도 됨):
-1. 이 프로젝트의 GitHub 페이지에서 초록색 **Code** 버튼 → **Download ZIP**.
-2. 다운로드한 ZIP을 압축 해제. 예: `C:\robo_market` 폴더가 되도록.
+1. <https://github.com/bong7233/Ros_Copilot> 에서 초록색 **Code** 버튼 → **Download ZIP**.
+2. 다운로드한 ZIP을 압축 해제. 예: `C:\Ros_Copilot` 폴더가 되도록.
 
-(깃을 쓸 줄 알면 `git clone`도 됩니다.)
+(깃을 쓸 줄 알면 `git clone https://github.com/bong7233/Ros_Copilot.git` 도 됩니다.)
 
 ### 4-3. 이미지 빌드 (한 번만, 시간이 좀 걸림)
 1. 시작 메뉴에서 **PowerShell** 실행.
 2. 프로젝트 폴더로 이동 (경로는 본인 것에 맞게):
    ```powershell
-   cd C:\robo_market
+   cd C:\Ros_Copilot
    ```
 3. 빌드 명령 (ROS2·Nav2 등 모두 담긴 리눅스 이미지를 만듭니다. **10~30분 소요, 수 GB 다운로드**):
    ```powershell
@@ -138,8 +138,8 @@ sudo apt install -y ros-humble-desktop ros-dev-tools \
 # 프로젝트 받기 (git 사용)
 sudo apt install -y git python3-pip
 cd ~
-git clone <이-프로젝트의-GitHub-주소> robo_market
-cd robo_market
+git clone https://github.com/bong7233/Ros_Copilot.git
+cd Ros_Copilot
 
 # AI 라이브러리 설치
 pip3 install -r requirements.txt
@@ -155,14 +155,14 @@ source install/setup.bash
 매번 새 터미널을 열면 아래 두 줄을 먼저 실행하세요(환경 불러오기):
 ```bash
 source /opt/ros/humble/setup.bash
-source ~/robo_market/ros2_copilot_ws/install/setup.bash
+source ~/Ros_Copilot/ros2_copilot_ws/install/setup.bash
 export ANTHROPIC_API_KEY="sk-ant-본인-키"
 export TURTLEBOT3_MODEL=burger
 ```
 
 **(a) RAG만 먼저 확인** (가장 간단):
 ```bash
-cd ~/robo_market/ros2_copilot_ws/src/copilot_rag
+cd ~/Ros_Copilot/ros2_copilot_ws/src/copilot_rag
 python3 -m copilot_rag.ingest data
 python3 -m copilot_rag.ask "costmap inflation이 뭐야?"
 ```
@@ -184,9 +184,9 @@ ros2 launch copilot_bringup sim.launch.py
 
 **(d) 웹앱** (경로 A와 같은 화면):
 ```bash
-pip3 install -r ~/robo_market/web/backend/requirements.txt
+pip3 install -r ~/Ros_Copilot/web/backend/requirements.txt
 # (a)/(b)의 노드가 켜진 상태에서:
-uvicorn server:app --app-dir ~/robo_market/web/backend --host 0.0.0.0 --port 8000
+uvicorn server:app --app-dir ~/Ros_Copilot/web/backend --host 0.0.0.0 --port 8000
 # 브라우저에서 http://localhost:8000
 ```
 

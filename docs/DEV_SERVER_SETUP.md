@@ -91,8 +91,7 @@ sudo ethtool -s enp5s0 wol g
 
 데스크톱에 SSH로 접속한 뒤(또는 VS Code Remote 터미널에서):
 ```bash
-git clone <이-저장소> && cd Robo_Market
-git checkout claude/rag-ai-agent-llm-wiki-d4opy6
+git clone https://github.com/bong7233/Ros_Copilot.git && cd Ros_Copilot
 docker build -f docker/Dockerfile -t robo-copilot .
 docker run -it --rm -p 8000:8000 -e ANTHROPIC_API_KEY="sk-ant-..." \
   robo-copilot bash /app/docker/web-demo.sh
