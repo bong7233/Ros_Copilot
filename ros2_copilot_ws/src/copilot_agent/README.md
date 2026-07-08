@@ -63,8 +63,19 @@ ros2 topic pub /copilot/estop std_msgs/msg/Bool "{data: true}" -1
 Or a target outside the map bounds (default ±10 m) is rejected by the executor's
 validation before any motion.
 
+## Agent tools
+
+| Tool | Does |
+|---|---|
+| `query_knowledge` | RAG lookup (`/copilot_rag/query`) |
+| `navigate_to` | send a goal to the executor action |
+| `get_robot_state` | read current pose from `/odom` |
+| `list_topics` | list active ROS2 topics |
+
+Each request also logs a `[usage] input_tokens=… output_tokens=…` line for
+cost/latency tracking.
+
 ## Known simplifications (improve later)
 
-- `navigate_to` runs a mock motion loop — Phase 4 swaps in Nav2 `NavigateToPose`
-- `get_robot_state` / `list_topics` tools not added yet
+- `navigate_to` runs a mock motion loop unless `use_nav2:=true` (Phase 4 Nav2)
 - Agent uses a manual loop (no streaming); fine for an MVP

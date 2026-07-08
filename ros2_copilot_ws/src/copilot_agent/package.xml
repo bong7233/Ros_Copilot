@@ -9,6 +9,7 @@
 
   <depend>rclpy</depend>
   <depend>copilot_msgs</depend>
+  <depend>nav_msgs</depend>
 
   <!-- Python dep (anthropic) via pip; see requirements.txt. -->
 

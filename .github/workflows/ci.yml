@@ -18,8 +18,8 @@ jobs:
         run: pip install pytest
       - name: Byte-compile all Python
         run: python -m compileall -q ros2_copilot_ws/src eval web/backend
-      - name: Chunking tests (no ROS, no API key)
-        run: pytest -q ros2_copilot_ws/src/copilot_rag/test/test_chunking.py
+      - name: RAG tests — chunking + reranker (no ROS, no API key)
+        run: pytest -q ros2_copilot_ws/src/copilot_rag/test/
         env:
           PYTHONPATH: ros2_copilot_ws/src/copilot_rag
       - name: Wiki tests (grounded mermaid, no API key)

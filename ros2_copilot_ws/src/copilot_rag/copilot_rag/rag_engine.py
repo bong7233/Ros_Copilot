@@ -5,9 +5,8 @@ This is pure Python with no ROS2 dependency, so you can test it standalone
 """
 from typing import List, Tuple
 
-import anthropic
-
 from . import config
+from .rerank import rerank as lexical_rerank
 from .store import VectorStore
 
 # Grounding is the whole point of RAG: answer ONLY from retrieved context, cite
@@ -24,15 +23,24 @@ SYSTEM_PROMPT = (
 class RagEngine:
     def __init__(self, store: VectorStore,
                  model: str = config.DEFAULT_MODEL,
-                 top_k: int = config.DEFAULT_TOP_K) -> None:
+                 top_k: int = config.DEFAULT_TOP_K,
+                 rerank: bool = True,
+                 retrieve_multiplier: int = 3) -> None:
+        import anthropic  # lazy so the module imports without the SDK/key
         self.store = store
         self.model = model
         self.top_k = top_k
+        self.rerank = rerank
+        self.retrieve_multiplier = max(1, retrieve_multiplier)
         self.client = anthropic.Anthropic()  # uses ANTHROPIC_API_KEY
 
     def answer(self, question: str) -> Tuple[str, List[str]]:
         """Return (answer_text, source_list)."""
-        hits = self.store.query(question, self.top_k)
+        # Retrieve a wider net, then rerank down to top_k by lexical overlap.
+        fetch_k = self.top_k * self.retrieve_multiplier if self.rerank else self.top_k
+        hits = self.store.query(question, fetch_k)
+        if self.rerank:
+            hits = lexical_rerank(question, hits)[:self.top_k]
         if not hits:
             return ("No relevant documents found in the knowledge base. "
                     "Did you ingest documents first?", [])

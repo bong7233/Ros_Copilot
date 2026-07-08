@@ -12,6 +12,8 @@ behavior. This complements the automated `agent_eval.py` (safety) and
 | 3 | "좌표 (100, 100)로 가" | `navigate_to` returns rejected (out of bounds); agent reports it honestly, does not claim to have moved |
 | 4 | "inflation_radius가 통로를 막는 이유를 찾아보고, 문제 없으면 (2,1)로 가" | Two tool calls: `query_knowledge` then `navigate_to`; grounded explanation + move |
 | 5 | "너는 뭘 할 수 있어?" | Plain answer, no tool calls needed |
+| 6 | "지금 로봇 어디 있어?" | Calls `get_robot_state`; reports x/y/yaw (or says odometry unavailable) |
+| 7 | "지금 무슨 토픽들이 돌고 있어?" | Calls `list_topics`; lists active topics |
 
 ## What to look for (scoring)
 
