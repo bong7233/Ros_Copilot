@@ -47,6 +47,7 @@ app = FastAPI(title="ROS2 Copilot", lifespan=lifespan)
 
 class AskRequest(BaseModel):
     message: str
+    history: list = []  # prior [{"role", "content"}] text turns (optional)
 
 
 @app.post("/api/ask")
@@ -54,7 +55,7 @@ async def ask(req: AskRequest):
     brain = _state["brain"]
     # The agent loop is blocking (LLM + ROS calls) — run it off the event loop.
     reply = await asyncio.get_event_loop().run_in_executor(
-        None, brain.run, req.message)
+        None, brain.run, req.message, req.history)
     return {"reply": reply}
 
 
@@ -67,7 +68,7 @@ async def ask_stream(req: AskRequest):
 
     def worker():
         try:
-            for event in brain.run_events(req.message):
+            for event in brain.run_events(req.message, req.history):
                 loop.call_soon_threadsafe(queue.put_nowait, event)
         except Exception as exc:  # noqa: BLE001 - surface to the client
             loop.call_soon_threadsafe(

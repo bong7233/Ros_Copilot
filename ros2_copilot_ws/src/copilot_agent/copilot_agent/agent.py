@@ -9,7 +9,7 @@ over that. The loop:
 Pure Python + anthropic + our ros_bridge; no rclpy node here, so it can run from
 a CLI or be wrapped in a ROS2 service node (see agent_node.py).
 """
-from typing import Callable, Dict, Iterator, List
+from typing import Callable, Dict, Iterator, List, Optional
 
 import anthropic
 
@@ -92,8 +92,12 @@ class AgentBrain:
         self.client = anthropic.Anthropic()
         self.model = model
 
-    def run_events(self, user_text: str) -> Iterator[Dict]:
+    def run_events(self, user_text: str,
+                   history: Optional[List[dict]] = None) -> Iterator[Dict]:
         """Run the agent loop, yielding events as they happen.
+
+        ``history`` is an optional list of prior {"role", "content"} text turns
+        for multi-turn context (the caller owns and updates it).
 
         Event shapes:
           {"type": "tool_call",   "name": str, "input": dict}
@@ -101,7 +105,8 @@ class AgentBrain:
           {"type": "usage",       "input_tokens": int, "output_tokens": int}
           {"type": "final",       "text": str}
         """
-        messages: List[dict] = [{"role": "user", "content": user_text}]
+        messages: List[dict] = list(history or []) + [
+            {"role": "user", "content": user_text}]
         total_in = total_out = 0
         while True:
             resp = self.client.messages.create(
@@ -139,10 +144,11 @@ class AgentBrain:
                 })
             messages.append({"role": "user", "content": tool_results})
 
-    def run(self, user_text: str, log: Callable[[str], None] = print) -> str:
+    def run(self, user_text: str, history: Optional[List[dict]] = None,
+            log: Callable[[str], None] = print) -> str:
         """Blocking convenience wrapper: log events, return the final text."""
         text = ""
-        for ev in self.run_events(user_text):
+        for ev in self.run_events(user_text, history):
             if ev["type"] == "tool_call":
                 log(f"[tool] {ev['name']}({ev['input']})")
             elif ev["type"] == "tool_result":
