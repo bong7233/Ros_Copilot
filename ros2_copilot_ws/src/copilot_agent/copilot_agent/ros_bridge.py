@@ -8,6 +8,7 @@ another node's callback under a MultiThreadedExecutor.
 `rclpy.init()` must already have been called by the process using these.
 """
 import math
+import time
 import uuid
 
 import rclpy
@@ -15,8 +16,16 @@ from rclpy.action import ActionClient
 
 from copilot_msgs.srv import Query
 from copilot_msgs.action import ExecuteCommand
+from nav_msgs.msg import Odometry
 
 from . import config
+
+
+def _yaw_from_quat(q) -> float:
+    """Extract yaw (rotation about z) from a quaternion."""
+    siny = 2.0 * (q.w * q.z + q.x * q.y)
+    cosy = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
+    return math.atan2(siny, cosy)
 
 
 def query_knowledge(question: str, timeout: float = 30.0):
@@ -66,5 +75,42 @@ def navigate_to(x: float, y: float, theta: float = 0.0, timeout: float = 60.0):
         if wrapped is None:
             return False, "navigation timed out"
         return wrapped.result.success, wrapped.result.message
+    finally:
+        node.destroy_node()
+
+
+def get_robot_state(timeout: float = 5.0):
+    """Read the robot's current pose from /odom.
+
+    Returns a dict {x, y, yaw} or None if no odometry was received.
+    """
+    node = rclpy.create_node(f"agent_state_{uuid.uuid4().hex[:8]}")
+    latest = {}
+    try:
+        node.create_subscription(
+            Odometry, "/odom", lambda m: latest.__setitem__("msg", m), 10)
+        deadline = time.time() + timeout
+        while time.time() < deadline and "msg" not in latest:
+            rclpy.spin_once(node, timeout_sec=0.1)
+        if "msg" not in latest:
+            return None
+        p = latest["msg"].pose.pose
+        return {
+            "x": p.position.x,
+            "y": p.position.y,
+            "yaw": _yaw_from_quat(p.orientation),
+        }
+    finally:
+        node.destroy_node()
+
+
+def list_topics(timeout: float = 2.0):
+    """Return the list of topic names currently on the ROS2 graph."""
+    node = rclpy.create_node(f"agent_topics_{uuid.uuid4().hex[:8]}")
+    try:
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            rclpy.spin_once(node, timeout_sec=0.1)
+        return sorted(name for name, _ in node.get_topic_names_and_types())
     finally:
         node.destroy_node()

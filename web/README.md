@@ -32,16 +32,30 @@ Open <http://localhost:8000> and chat. Try:
 If you start the web server **without** the ROS2 nodes running, the chat still
 works but tool calls return "unavailable" — the agent will say so honestly.
 
+Watch the **🔧 tool chips** appear live as the agent decides to look up
+knowledge or command the robot — the web UI streams the agent's trace over
+Server-Sent Events and shows token usage per answer. Conversation is
+**multi-turn**: the browser keeps the prior turns and sends them as context, so
+you can say "그럼 거기로 가" after asking about a place. "새 대화" clears it.
+
+## Endpoints
+
+- `POST /api/ask` → `{reply}` (blocking, simple)
+- `POST /api/ask/stream` → Server-Sent Events: `tool_call` / `tool_result` /
+  `usage` / `final` (used by the chat UI)
+
 ## Design notes
 
 - One process: FastAPI serves both the JSON API and the static `frontend/`.
-- The blocking agent loop runs in a thread pool so it doesn't block the event
-  loop; each request spins short-lived ROS client nodes (see
+- The agent loop is a generator (`AgentBrain.run_events`); the SSE endpoint runs
+  it in a background thread feeding an asyncio queue, so the event loop stays
+  responsive. Each request spins short-lived ROS client nodes (see
   `copilot_agent/ros_bridge.py`).
-- Frontend is a single dependency-free `index.html` (no build step).
+- Frontend is a single dependency-free `index.html` (no build step); it parses
+  SSE from a `fetch` stream reader.
 
 ## Extensions
 
-- Stream the reply token-by-token (SSE) instead of waiting for the full answer
-- Show which tools were called (surface the agent's tool trace)
+- Token-by-token streaming of the final text (not just per-event)
 - Auth + rate limiting before exposing beyond localhost
+- Server-side session history (currently the browser holds it)

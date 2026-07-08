@@ -16,11 +16,14 @@ Requires the workspace to be built and sourced (so `copilot_agent` and
 `copilot_msgs` import), plus `pip install -r web/backend/requirements.txt`.
 """
 import asyncio
+import json
 import os
+import threading
 from contextlib import asynccontextmanager
 
 import rclpy
 from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -44,6 +47,7 @@ app = FastAPI(title="ROS2 Copilot", lifespan=lifespan)
 
 class AskRequest(BaseModel):
     message: str
+    history: list = []  # prior [{"role", "content"}] text turns (optional)
 
 
 @app.post("/api/ask")
@@ -51,8 +55,37 @@ async def ask(req: AskRequest):
     brain = _state["brain"]
     # The agent loop is blocking (LLM + ROS calls) — run it off the event loop.
     reply = await asyncio.get_event_loop().run_in_executor(
-        None, brain.run, req.message)
+        None, brain.run, req.message, req.history)
     return {"reply": reply}
+
+
+@app.post("/api/ask/stream")
+async def ask_stream(req: AskRequest):
+    """Server-Sent Events: stream tool calls, results, usage, and final text."""
+    brain = _state["brain"]
+    loop = asyncio.get_event_loop()
+    queue: asyncio.Queue = asyncio.Queue()
+
+    def worker():
+        try:
+            for event in brain.run_events(req.message, req.history):
+                loop.call_soon_threadsafe(queue.put_nowait, event)
+        except Exception as exc:  # noqa: BLE001 - surface to the client
+            loop.call_soon_threadsafe(
+                queue.put_nowait, {"type": "error", "message": str(exc)})
+        finally:
+            loop.call_soon_threadsafe(queue.put_nowait, None)  # done sentinel
+
+    threading.Thread(target=worker, daemon=True).start()
+
+    async def event_stream():
+        while True:
+            event = await queue.get()
+            if event is None:
+                break
+            yield f"data: {json.dumps(event)}\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
 # Serve the static chat UI. Mounted last so /api/* routes take precedence.

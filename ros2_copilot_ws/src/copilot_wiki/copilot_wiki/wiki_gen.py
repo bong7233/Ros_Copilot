@@ -8,8 +8,6 @@
 import re
 from typing import Dict
 
-import anthropic
-
 from . import config
 
 
@@ -110,6 +108,7 @@ def render_index(graph: Dict) -> str:
 
 def generate_pages(graph: Dict, model: str = config.MODEL) -> Dict[str, str]:
     """Return {relative_path: markdown} for the whole wiki."""
+    import anthropic  # lazy: keeps the deterministic helpers import-free
     client = anthropic.Anthropic()
     pages: Dict[str, str] = {"index.md": render_index(graph)}
     for nname, info in graph["nodes"].items():
