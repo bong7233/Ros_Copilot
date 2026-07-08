@@ -57,6 +57,7 @@ flowchart LR
 - 🚀 [**실행 가이드 (HOW_TO_RUN)**](docs/HOW_TO_RUN.md) — **프로그래밍 몰라도** 따라 하는 전체 실행법 (Windows 11 · Docker · WSL2 · 리눅스). 면접 데모용으로도 이 문서를 그대로 쓰세요.
 - 🧭 [**GuideForBong**](docs/GuideForBong.md) — *이 프로젝트가 정말 RAG/Agent/Wiki를 쓰나? 내가 뭘 배우나?* 에 대한 자세한 답
 - 🖥️ [**실행 환경 가이드**](docs/ENVIRONMENT.md) — 윈도우/리눅스/Docker에서 어떻게 돌리나, 실행 형태(분산 시스템 vs 웹앱)
+- 🛰️ [**개발 서버 세팅**](docs/DEV_SERVER_SETUP.md) — 집 고성능 데스크톱을 리눅스 개발 서버로, 노트북에서 원격 접속 (Tailscale · VS Code Remote-SSH · Moonlight)
 - 📐 [**아키텍처**](docs/ARCHITECTURE.md) — 노드 설계, C++/Python 분리, 데이터 흐름, 워크스페이스 구조
 - 🗺️ [**로드맵**](docs/ROADMAP.md) — Phase 0~5 단계별 빌드 & 학습 계획, "완료 기준"
 - 📚 [**학습 가이드**](docs/LEARNING_GUIDE.md) — RAG / Agent / LLM Wiki / ROS2 각각을 어떻게 익힐지 + 추천 자료
