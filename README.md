@@ -53,7 +53,8 @@ flowchart LR
 
 ## 문서
 
-- 🚀 [**실행 가이드 (HOW_TO_RUN)**](docs/HOW_TO_RUN.md) — **프로그래밍 몰라도** 따라 하는 실행법 (Windows 11 · Docker · WSL2). 면접 데모용으로도 이 문서를 그대로 쓰세요.
+- ⚡ [**윈도우 11 빠른 실행**](docs/QUICKSTART_WINDOWS.md) — 지금 윈도우 데스크톱에서 5단계로 웹 챗 띄우기 (가장 짧음)
+- 🚀 [**실행 가이드 (HOW_TO_RUN)**](docs/HOW_TO_RUN.md) — **프로그래밍 몰라도** 따라 하는 전체 실행법 (Windows 11 · Docker · WSL2 · 리눅스). 면접 데모용으로도 이 문서를 그대로 쓰세요.
 - 🧭 [**GuideForBong**](docs/GuideForBong.md) — *이 프로젝트가 정말 RAG/Agent/Wiki를 쓰나? 내가 뭘 배우나?* 에 대한 자세한 답
 - 🖥️ [**실행 환경 가이드**](docs/ENVIRONMENT.md) — 윈도우/리눅스/Docker에서 어떻게 돌리나, 실행 형태(분산 시스템 vs 웹앱)
 - 📐 [**아키텍처**](docs/ARCHITECTURE.md) — 노드 설계, C++/Python 분리, 데이터 흐름, 워크스페이스 구조
