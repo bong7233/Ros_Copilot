@@ -24,14 +24,14 @@
 3. **API Keys** → **Create Key** → 생성된 `sk-ant-...` 문자열을 **복사해서 메모**. (창 닫으면 다시 못 봄)
 
 ## 3단계 · 코드 내려받기
-GitHub 저장소 → 브랜치를 **`claude/rag-ai-agent-llm-wiki-d4opy6`** 로 바꾼 뒤 → 초록색 **Code** 버튼 → **Download ZIP** → 압축 해제.
-예: `C:\robo` 안에 풀어서 폴더가 `C:\robo\Robo_Market-...` 가 되게 합니다.
+<https://github.com/bong7233/Ros_Copilot> → 초록색 **Code** 버튼 → **Download ZIP** → 압축 해제.
+예: `C:\robo` 안에 풀어서 폴더가 `C:\robo\Ros_Copilot-main` 이 되게 합니다.
 
 ## 4단계 · 이미지 빌드 (한 번만, 10~30분)
 1. 시작 메뉴에서 **PowerShell** 실행.
 2. 압축 푼 폴더로 이동 (경로는 본인 것에 맞게, 폴더에 `docker` 와 `ros2_copilot_ws` 가 보여야 함):
    ```powershell
-   cd C:\robo\Robo_Market-claude-rag-ai-agent-llm-wiki-d4opy6
+   cd C:\robo\Ros_Copilot-main
    ```
 3. 빌드:
    ```powershell
