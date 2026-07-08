@@ -1,5 +1,8 @@
 # ROS2 Copilot 🤖🧠
 
+[![CI](https://github.com/bong7233/Robo_Market/actions/workflows/ci.yml/badge.svg)](https://github.com/bong7233/Robo_Market/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 > ROS2 로봇을 위한 **LLM 에이전트 & 지식 어시스턴트** — RAG · AI Agent · LLM Wiki를 실제 로봇 시스템에 결합한 프로젝트
 
 **로봇공학 C++·Python 개발자**로서의 실력과, **요즘 가장 뜨거운 AI 스택(RAG / AI Agent / LLM Wiki)** 을 한 프로젝트 안에서 동시에 증명하는 것을 목표로 합니다. 뻔한 "ChatGPT 래퍼"도, 뻔한 ROS2 튜토리얼도 아닌 **둘의 교집합** — 지금 로봇 업계에서 제일 뜨거운 프론티어(LLM × Robotics, embodied agent)를 직접 만들어 봅니다.
