@@ -9,7 +9,7 @@ over that. The loop:
 Pure Python + anthropic + our ros_bridge; no rclpy node here, so it can run from
 a CLI or be wrapped in a ROS2 service node (see agent_node.py).
 """
-from typing import Callable, List
+from typing import Callable, Dict, Iterator, List
 
 import anthropic
 
@@ -92,7 +92,15 @@ class AgentBrain:
         self.client = anthropic.Anthropic()
         self.model = model
 
-    def run(self, user_text: str, log: Callable[[str], None] = print) -> str:
+    def run_events(self, user_text: str) -> Iterator[Dict]:
+        """Run the agent loop, yielding events as they happen.
+
+        Event shapes:
+          {"type": "tool_call",   "name": str, "input": dict}
+          {"type": "tool_result", "name": str, "content": str}
+          {"type": "usage",       "input_tokens": int, "output_tokens": int}
+          {"type": "final",       "text": str}
+        """
         messages: List[dict] = [{"role": "user", "content": user_text}]
         total_in = total_out = 0
         while True:
@@ -106,9 +114,11 @@ class AgentBrain:
             total_in += resp.usage.input_tokens
             total_out += resp.usage.output_tokens
             if resp.stop_reason != "tool_use":
-                log(f"[usage] input_tokens={total_in} output_tokens={total_out}")
-                return next(
-                    (b.text for b in resp.content if b.type == "text"), "")
+                yield {"type": "usage", "input_tokens": total_in,
+                       "output_tokens": total_out}
+                yield {"type": "final", "text": next(
+                    (b.text for b in resp.content if b.type == "text"), "")}
+                return
 
             # Echo the assistant turn (incl. tool_use blocks) back into history.
             messages.append({"role": "assistant", "content": resp.content})
@@ -117,15 +127,32 @@ class AgentBrain:
             for block in resp.content:
                 if block.type != "tool_use":
                     continue
-                log(f"[tool] {block.name}({block.input})")
+                yield {"type": "tool_call", "name": block.name,
+                       "input": dict(block.input)}
                 output = self._dispatch(block.name, block.input)
-                log(f"[result] {output}")
+                yield {"type": "tool_result", "name": block.name,
+                       "content": output}
                 tool_results.append({
                     "type": "tool_result",
                     "tool_use_id": block.id,
                     "content": output,
                 })
             messages.append({"role": "user", "content": tool_results})
+
+    def run(self, user_text: str, log: Callable[[str], None] = print) -> str:
+        """Blocking convenience wrapper: log events, return the final text."""
+        text = ""
+        for ev in self.run_events(user_text):
+            if ev["type"] == "tool_call":
+                log(f"[tool] {ev['name']}({ev['input']})")
+            elif ev["type"] == "tool_result":
+                log(f"[result] {ev['content']}")
+            elif ev["type"] == "usage":
+                log(f"[usage] input_tokens={ev['input_tokens']} "
+                    f"output_tokens={ev['output_tokens']}")
+            elif ev["type"] == "final":
+                text = ev["text"]
+        return text
 
     @staticmethod
     def _dispatch(name: str, inp: dict) -> str:

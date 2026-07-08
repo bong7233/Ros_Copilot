@@ -47,6 +47,14 @@
       color: #fff; font-weight: 600; cursor: pointer;
     }
     button:disabled { opacity: .5; cursor: default; }
+    .msg .body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .tools { display: flex; flex-direction: column; gap: 4px; }
+    .tool {
+      font-size: 12px; color: var(--muted); background: #12151b;
+      border: 1px solid var(--line); border-radius: 8px; padding: 5px 9px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all;
+    }
+    .usage { font-size: 11px; color: var(--muted); }
     .hint { max-width: 760px; margin: 0 auto 14px; color: var(--muted); font-size: 13px; }
   </style>
 </head>
@@ -87,16 +95,61 @@
     }
 
     async function ask(message) {
-      const bubble = add('robot', '…', 'bot');
+      // Build a bot message with a tool-activity area, a bubble, and a usage line.
+      const el = document.createElement('div');
+      el.className = 'msg bot';
+      el.innerHTML = '<div class="who">robot</div><div class="body">'
+        + '<div class="tools"></div><div class="bubble">…</div>'
+        + '<div class="usage"></div></div>';
+      log.appendChild(el);
+      const toolsEl = el.querySelector('.tools');
+      const bubble = el.querySelector('.bubble');
+      const usageEl = el.querySelector('.usage');
+      log.scrollTop = log.scrollHeight;
+
       try {
-        const res = await fetch('/api/ask', {
+        const res = await fetch('/api/ask/stream', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message }),
         });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        bubble.textContent = data.reply || '(빈 응답)';
+        if (!res.ok || !res.body) throw new Error('HTTP ' + res.status);
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = '';
+        let gotFinal = false;
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          const frames = buf.split('\n\n');
+          buf = frames.pop();  // keep the trailing incomplete frame
+          for (const frame of frames) {
+            const dataLine = frame.split('\n').find(l => l.startsWith('data:'));
+            if (!dataLine) continue;
+            const ev = JSON.parse(dataLine.slice(5).trim());
+            if (ev.type === 'tool_call') {
+              const chip = document.createElement('div');
+              chip.className = 'tool';
+              chip.textContent = '🔧 ' + ev.name + '(' + JSON.stringify(ev.input) + ')';
+              toolsEl.appendChild(chip);
+            } else if (ev.type === 'tool_result') {
+              const last = toolsEl.lastChild;
+              if (last) last.textContent += ' → ' + ev.content.split('\n')[0].slice(0, 80);
+            } else if (ev.type === 'final') {
+              bubble.textContent = ev.text || '(빈 응답)';
+              gotFinal = true;
+            } else if (ev.type === 'usage') {
+              usageEl.textContent = 'tokens: in ' + ev.input_tokens + ' / out ' + ev.output_tokens;
+            } else if (ev.type === 'error') {
+              bubble.textContent = '오류: ' + ev.message;
+              gotFinal = true;
+            }
+            log.scrollTop = log.scrollHeight;
+          }
+        }
+        if (!gotFinal && bubble.textContent === '…') bubble.textContent = '(응답 없음)';
       } catch (e) {
         bubble.textContent = '오류: ' + e.message;
       }
