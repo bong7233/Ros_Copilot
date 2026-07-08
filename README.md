@@ -21,6 +21,21 @@ Gazebo 시뮬레이션 위에서 돌아가는 ROS2 모바일 로봇을 두고, *
 "이 로봇 시스템 문서 만들어줘"                                          → 🟨 LLM Wiki가 노드 그래프를 자동 문서화
 ```
 
+## 시스템 한눈에 보기
+
+```mermaid
+flowchart LR
+    U([사용자 / 브라우저 챗]) --> A["🟩 AI Agent<br/>(Python)"]
+    A -->|query_knowledge| R["🟦 RAG<br/>(Python)"]
+    A -->|navigate_to| E["🟩 Executor<br/>(C++, 안전검증)"]
+    R --> V[(벡터 DB)]
+    R --> C{{Claude API}}
+    A --> C
+    E --> N["Nav2 / Gazebo"]
+    S["🟩 Safety Monitor (C++)"] -->|/scan → e-stop| E
+    G["🟨 LLM Wiki (Python)"] -.그래프 introspection.-> N
+```
+
 ## 3-레이어 아키텍처
 
 | 레이어 | 역할 | 배우는 AI 기술 | 배우는 로봇/개발 기술 | 언어 |
@@ -54,6 +69,20 @@ Gazebo 시뮬레이션 위에서 돌아가는 ROS2 모바일 로봇을 두고, *
 
 ## 시작하기
 
+### ⚡ 빠른 체험 (Docker, 웹 챗 — 프로그래밍 몰라도 OK)
+
+```bash
+docker build -f docker/Dockerfile -t robo-copilot .
+docker run -it --rm -p 8000:8000 -e ANTHROPIC_API_KEY="sk-ant-..." \
+  robo-copilot bash /app/docker/web-demo.sh
+# → 브라우저에서 http://localhost:8000
+```
+
+자세한 단계별 안내(Windows 11 · WSL2 · 리눅스 포함)는
+[**실행 가이드**](docs/HOW_TO_RUN.md)를 보세요.
+
+### 워크스페이스 구조
+
 **Phase 0 스캐폴딩이 이미 들어있습니다.** [`ros2_copilot_ws/`](ros2_copilot_ws/)에 colcon 워크스페이스가 있어요:
 - `copilot_msgs` — C++/Python 양쪽에서 쓰는 커스텀 인터페이스
 - `copilot_py_demo` (rclpy) ⇄ `copilot_cpp_demo` (rclcpp) — 커스텀 메시지로 통신하는 데모
@@ -69,4 +98,4 @@ Gazebo 시뮬레이션 위에서 돌아가는 ROS2 모바일 로봇을 두고, *
 
 ## 라이선스
 
-MIT (예정)
+[MIT](LICENSE)
