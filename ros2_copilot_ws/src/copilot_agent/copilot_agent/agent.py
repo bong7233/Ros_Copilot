@@ -9,7 +9,7 @@ over that. The loop:
 Pure Python + anthropic + our ros_bridge; no rclpy node here, so it can run from
 a CLI or be wrapped in a ROS2 service node (see agent_node.py).
 """
-from typing import Callable, Dict, Iterator, List, Optional
+from typing import Callable, Dict, Iterator, List, Optional, Tuple
 
 import anthropic
 
@@ -145,12 +145,12 @@ class AgentBrain:
                     continue
                 yield {"type": "tool_call", "name": block.name,
                        "input": dict(block.input)}
-                output = self._dispatch(block.name, block.input)
+                output, meta = self._dispatch(block.name, block.input)
                 tools_trace.append({"name": block.name,
                                     "input": dict(block.input),
-                                    "result": output})
+                                    "result": output, "meta": meta})
                 yield {"type": "tool_result", "name": block.name,
-                       "content": output}
+                       "content": output, "meta": meta}
                 tool_results.append({
                     "type": "tool_result",
                     "tool_use_id": block.id,
@@ -175,23 +175,24 @@ class AgentBrain:
         return text
 
     @staticmethod
-    def _dispatch(name: str, inp: dict) -> str:
+    def _dispatch(name: str, inp: dict) -> Tuple[str, dict]:
+        """Return (content_for_the_model, meta_for_the_UI)."""
         if name == "query_knowledge":
             answer, sources = ros_bridge.query_knowledge(inp["question"])
             src = ", ".join(sources) if sources else "none"
-            return f"{answer}\n(sources: {src})"
+            return f"{answer}\n(sources: {src})", {"sources": sources}
         if name == "navigate_to":
             ok, msg = ros_bridge.navigate_to(
                 float(inp["x"]), float(inp["y"]),
                 float(inp.get("theta", 0.0)))
-            return f"{'SUCCESS' if ok else 'FAILED'}: {msg}"
+            return f"{'SUCCESS' if ok else 'FAILED'}: {msg}", {}
         if name == "get_robot_state":
             state = ros_bridge.get_robot_state()
             if state is None:
-                return "no odometry available (is the robot/sim running?)"
+                return "no odometry available (is the robot/sim running?)", {}
             return (f"x={state['x']:.2f}, y={state['y']:.2f}, "
-                    f"yaw={state['yaw']:.2f} rad")
+                    f"yaw={state['yaw']:.2f} rad"), {}
         if name == "list_topics":
             topics = ros_bridge.list_topics()
-            return "active topics:\n" + "\n".join(f"- {t}" for t in topics)
-        return f"unknown tool: {name}"
+            return "active topics:\n" + "\n".join(f"- {t}" for t in topics), {}
+        return f"unknown tool: {name}", {}

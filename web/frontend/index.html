@@ -59,6 +59,12 @@
       border: 1px solid var(--line); border-radius: 8px; padding: 5px 9px;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all;
     }
+    .sources { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; }
+    .src-label { color: var(--muted); }
+    .src {
+      background: #1a2230; border: 1px solid var(--line); border-radius: 6px;
+      padding: 2px 8px; color: #9fb4d6; font-family: ui-monospace, monospace;
+    }
     .usage { font-size: 11px; color: var(--muted); }
     .hint { max-width: 760px; margin: 0 auto 14px; color: var(--muted); font-size: 13px; }
   </style>
@@ -107,11 +113,13 @@
       el.className = 'msg bot';
       el.innerHTML = '<div class="who">robot</div><div class="body">'
         + '<div class="tools"></div><div class="bubble">…</div>'
-        + '<div class="usage"></div></div>';
+        + '<div class="sources"></div><div class="usage"></div></div>';
       log.appendChild(el);
       const toolsEl = el.querySelector('.tools');
       const bubble = el.querySelector('.bubble');
+      const sourcesEl = el.querySelector('.sources');
       const usageEl = el.querySelector('.usage');
+      const sourceSet = new Set();
       log.scrollTop = log.scrollHeight;
 
       try {
@@ -145,6 +153,17 @@
             } else if (ev.type === 'tool_result') {
               const last = toolsEl.lastChild;
               if (last) last.textContent += ' → ' + ev.content.split('\n')[0].slice(0, 80);
+              // Show RAG citations as source chips under the answer.
+              if (ev.meta && Array.isArray(ev.meta.sources) && ev.meta.sources.length) {
+                ev.meta.sources.forEach((s) => sourceSet.add(s));
+                sourcesEl.innerHTML = '<span class="src-label">📄 출처:</span>';
+                sourceSet.forEach((s) => {
+                  const chip = document.createElement('span');
+                  chip.className = 'src';
+                  chip.textContent = s;
+                  sourcesEl.appendChild(chip);
+                });
+              }
             } else if (ev.type === 'final') {
               bubble.textContent = ev.text || '(빈 응답)';
               finalText = ev.text || '';
