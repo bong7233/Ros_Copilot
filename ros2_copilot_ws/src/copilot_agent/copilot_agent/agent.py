@@ -15,6 +15,7 @@ import anthropic
 
 from . import config
 from . import ros_bridge
+from . import transcript
 
 SYSTEM_PROMPT = (
     "You are the brain of a ROS2 mobile-robot copilot. Your tools: "
@@ -108,6 +109,7 @@ class AgentBrain:
         messages: List[dict] = list(history or []) + [
             {"role": "user", "content": user_text}]
         total_in = total_out = 0
+        tools_trace: List[dict] = []
         while True:
             resp = self.client.messages.create(
                 model=self.model,
@@ -119,10 +121,19 @@ class AgentBrain:
             total_in += resp.usage.input_tokens
             total_out += resp.usage.output_tokens
             if resp.stop_reason != "tool_use":
+                final_text = next(
+                    (b.text for b in resp.content if b.type == "text"), "")
+                if config.TRANSCRIPT_PATH:
+                    transcript.append_record(config.TRANSCRIPT_PATH, {
+                        "user": user_text,
+                        "tools": tools_trace,
+                        "reply": final_text,
+                        "usage": {"input_tokens": total_in,
+                                  "output_tokens": total_out},
+                    })
                 yield {"type": "usage", "input_tokens": total_in,
                        "output_tokens": total_out}
-                yield {"type": "final", "text": next(
-                    (b.text for b in resp.content if b.type == "text"), "")}
+                yield {"type": "final", "text": final_text}
                 return
 
             # Echo the assistant turn (incl. tool_use blocks) back into history.
@@ -135,6 +146,9 @@ class AgentBrain:
                 yield {"type": "tool_call", "name": block.name,
                        "input": dict(block.input)}
                 output = self._dispatch(block.name, block.input)
+                tools_trace.append({"name": block.name,
+                                    "input": dict(block.input),
+                                    "result": output})
                 yield {"type": "tool_result", "name": block.name,
                        "content": output}
                 tool_results.append({
