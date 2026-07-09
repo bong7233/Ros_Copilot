@@ -54,6 +54,13 @@ token usage — is recorded as one JSON line and shown here, most recent first.
 The web chat and the ROS2 `agent` node share the same log, so this view surfaces
 interactions from both. If logging is off, the panel explains how to enable it.
 
+Click **📊 상태** for a **live runtime health** snapshot — deliberately distinct
+from the wiki's *static* structure. It samples the running system for ~2s and
+shows which nodes are alive, the **e-stop** state, the robot **pose** (`/odom`),
+whether the RAG service and executor action are reachable, and the **publish
+rate (Hz)** of key topics (`/odom`, `/scan`, `/cmd_vel`, `/copilot/estop`,
+`/tf`, `/map`) as little bars. The panel auto-refreshes every 4s while open.
+
 ## Endpoints
 
 - `POST /api/ask` → `{reply}` (blocking, simple)
@@ -64,6 +71,8 @@ interactions from both. If logging is off, the panel explains how to enable it.
   grounded description of one node (on demand)
 - `GET /api/transcripts?limit=N` → `{enabled, path, records}` — recent recorded
   agent interactions (most recent first; empty when logging is off)
+- `GET /api/status` → `{nodes, robot, estop, topics, services, window_sec}` —
+  a live runtime health snapshot (samples the system for ~2s)
 
 ## Design notes
 
