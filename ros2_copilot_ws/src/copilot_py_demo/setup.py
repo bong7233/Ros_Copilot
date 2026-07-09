@@ -14,7 +14,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='bong',
-    maintainer_email='batmantwo7233@gmail.com',
+    maintainer_email='bong7233@users.noreply.github.com',
     description='Phase 0: rclpy talker publishing Heartbeat.',
     license='MIT',
     tests_require=['pytest'],

@@ -4,7 +4,7 @@
   <name>copilot_agent</name>
   <version>0.0.1</version>
   <description>Layer 2 (brain): LLM agent that reasons and calls tools mapped to ROS2 interfaces (RAG service, executor action).</description>
-  <maintainer email="batmantwo7233@gmail.com">bong</maintainer>
+  <maintainer email="bong7233@users.noreply.github.com">bong</maintainer>
   <license>MIT</license>
 
   <depend>rclpy</depend>
