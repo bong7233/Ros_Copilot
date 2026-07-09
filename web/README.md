@@ -34,7 +34,9 @@ works but tool calls return "unavailable" — the agent will say so honestly.
 
 Watch the **🔧 tool chips** appear live as the agent decides to look up
 knowledge or command the robot — the web UI streams the agent's trace over
-Server-Sent Events and shows token usage per answer. Conversation is
+Server-Sent Events and shows token usage per answer. When the agent uses RAG,
+the **📄 source documents** it grounded on are shown as citation chips under the
+answer. Conversation is
 **multi-turn**: the browser keeps the prior turns and sends them as context, so
 you can say "그럼 거기로 가" after asking about a place. "새 대화" clears it.
 
