@@ -4,7 +4,7 @@
   <name>copilot_rag</name>
   <version>0.0.1</version>
   <description>Layer 1: RAG knowledge assistant exposed as a ROS2 service.</description>
-  <maintainer email="batmantwo7233@gmail.com">bong</maintainer>
+  <maintainer email="bong7233@users.noreply.github.com">bong</maintainer>
   <license>MIT</license>
 
   <depend>rclpy</depend>

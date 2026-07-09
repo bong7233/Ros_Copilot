@@ -4,7 +4,7 @@
   <name>copilot_bringup</name>
   <version>0.0.1</version>
   <description>Phase 4: launch files and config to bring up the copilot nodes, and (in simulation) Gazebo + Nav2.</description>
-  <maintainer email="batmantwo7233@gmail.com">bong</maintainer>
+  <maintainer email="bong7233@users.noreply.github.com">bong</maintainer>
   <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

@@ -75,6 +75,18 @@ validation before any motion.
 Each request also logs a `[usage] input_tokens=… output_tokens=…` line for
 cost/latency tracking.
 
+### Transcript logging (optional)
+
+Set `COPILOT_AGENT_LOG` to a file path and every interaction (user message, the
+tools called with their results, the reply, and token usage) is appended as one
+JSON line — handy for debugging a running system or collecting eval data:
+
+```bash
+export COPILOT_AGENT_LOG=~/.copilot_agent/transcripts.jsonl
+ros2 run copilot_agent agent
+# ~/.copilot_agent/transcripts.jsonl now gets one JSON record per turn
+```
+
 ## Known simplifications (improve later)
 
 - `navigate_to` runs a mock motion loop unless `use_nav2:=true` (Phase 4 Nav2)

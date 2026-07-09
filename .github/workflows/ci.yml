@@ -26,6 +26,10 @@ jobs:
         run: pytest -q ros2_copilot_ws/src/copilot_wiki/test/test_wiki.py
         env:
           PYTHONPATH: ros2_copilot_ws/src/copilot_wiki
+      - name: Agent tests (transcript logging, no ROS/key)
+        run: pytest -q ros2_copilot_ws/src/copilot_agent/test/
+        env:
+          PYTHONPATH: ros2_copilot_ws/src/copilot_agent
 
   ros2-build:
     name: ROS2 colcon build

@@ -14,7 +14,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='bong',
-    maintainer_email='batmantwo7233@gmail.com',
+    maintainer_email='bong7233@users.noreply.github.com',
     description='Layer 3: LLM Wiki — auto-generate grounded docs from the ROS2 graph.',
     license='MIT',
     tests_require=['pytest'],

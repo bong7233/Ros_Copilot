@@ -8,3 +8,7 @@ MODEL = os.environ.get("COPILOT_AGENT_MODEL", "claude-opus-4-8")
 RAG_SERVICE = os.environ.get("COPILOT_RAG_SERVICE", "/copilot_rag/query")
 EXECUTE_ACTION = os.environ.get(
     "COPILOT_EXECUTE_ACTION", "/copilot_executor/execute_command")
+
+# Optional: path to append per-interaction JSONL transcripts (debug/eval).
+_log = os.environ.get("COPILOT_AGENT_LOG")
+TRANSCRIPT_PATH = os.path.expanduser(_log) if _log else None

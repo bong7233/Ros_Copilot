@@ -4,7 +4,7 @@
   <name>copilot_wiki</name>
   <version>0.0.1</version>
   <description>Layer 3: LLM Wiki — introspect the live ROS2 graph and auto-generate grounded Markdown documentation.</description>
-  <maintainer email="batmantwo7233@gmail.com">bong</maintainer>
+  <maintainer email="bong7233@users.noreply.github.com">bong</maintainer>
   <license>MIT</license>
 
   <depend>rclpy</depend>
