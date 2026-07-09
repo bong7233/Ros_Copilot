@@ -47,6 +47,13 @@ the running ROS2 graph and shows one card per node with what it **publishes**,
 LLM-written, grounded description of that node on demand. If no nodes are
 running, the panel says so instead of inventing them.
 
+Click **📜 기록** to browse past agent interactions. When the server is started
+with `COPILOT_AGENT_LOG` pointing at a file (see `copilot_agent`'s README), every
+turn — the user message, the tools called with their results, the reply, and
+token usage — is recorded as one JSON line and shown here, most recent first.
+The web chat and the ROS2 `agent` node share the same log, so this view surfaces
+interactions from both. If logging is off, the panel explains how to enable it.
+
 ## Endpoints
 
 - `POST /api/ask` → `{reply}` (blocking, simple)
@@ -55,6 +62,8 @@ running, the panel says so instead of inventing them.
 - `GET /api/wiki` → `{nodes, mermaid}` — the live ROS2 graph (no LLM)
 - `GET /api/wiki/describe?node=<name>` → `{description}` — an LLM-written,
   grounded description of one node (on demand)
+- `GET /api/transcripts?limit=N` → `{enabled, path, records}` — recent recorded
+  agent interactions (most recent first; empty when logging is off)
 
 ## Design notes
 

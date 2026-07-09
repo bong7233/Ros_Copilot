@@ -131,6 +131,28 @@ async def wiki_describe(node: str):
     return await asyncio.get_event_loop().run_in_executor(None, work)
 
 
+# ---- Transcripts: browse past agent interactions (if logging is enabled) ----
+
+@app.get("/api/transcripts")
+async def transcripts(limit: int = 50):
+    """Return recent agent interaction records (most recent first).
+
+    Reads the JSONL file the agent appends to when COPILOT_AGENT_LOG is set
+    (shared with the ROS2 agent node). Returns an empty list + a hint when
+    logging is off or nothing has been recorded yet.
+    """
+    from copilot_agent import config as acfg
+    from copilot_agent.transcript import read_records
+    path = acfg.TRANSCRIPT_PATH
+    if not path:
+        return {"enabled": False, "path": None, "records": [],
+                "hint": "Set COPILOT_AGENT_LOG to a file path to record "
+                        "transcripts."}
+    records = await asyncio.get_event_loop().run_in_executor(
+        None, read_records, path, limit)
+    return {"enabled": True, "path": path, "records": records}
+
+
 # Serve the static chat UI. Mounted last so /api/* routes take precedence.
 _FRONTEND = os.path.join(os.path.dirname(__file__), "..", "frontend")
 app.mount("/", StaticFiles(directory=_FRONTEND, html=True), name="frontend")
