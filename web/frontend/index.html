@@ -56,6 +56,24 @@
     .trec-role { font-size: 12px; color: var(--muted); width: 62px; flex: none; }
     .trec-text { white-space: pre-wrap; word-break: break-word; min-width: 0; }
     .trec-tools { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; }
+    #status { flex: 1; overflow-y: auto; padding: 20px; }
+    .scard {
+      max-width: 820px; margin: 0 auto 14px; background: var(--panel);
+      border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px;
+    }
+    .scard h3 { margin: 0 0 10px; font-size: 13px; color: var(--muted); font-weight: 600; }
+    .stat { display: flex; gap: 8px; align-items: baseline; margin-bottom: 4px; }
+    .stat .k { color: var(--muted); font-size: 13px; width: 130px; flex: none; }
+    .stat .v { font-family: ui-monospace, monospace; font-size: 13px; color: #cdd3dd; word-break: break-all; }
+    .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; }
+    .pill .led { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+    .led.ok { background: #37c871; } .led.bad { background: #ff5f56; } .led.warn { background: #f5b731; }
+    .hzrow { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+    .hzrow .name { width: 150px; flex: none; font-family: ui-monospace, monospace; font-size: 13px; }
+    .hzbar { flex: 1; height: 8px; background: #12151b; border-radius: 4px; overflow: hidden; }
+    .hzbar > span { display: block; height: 100%; background: var(--accent); }
+    .hzrow .hz { width: 74px; flex: none; text-align: right; font-size: 12px; color: var(--muted); }
+    .status-meta { max-width: 820px; margin: 0 auto 10px; font-size: 12px; color: var(--muted); }
     #log { flex: 1; overflow-y: auto; padding: 20px; }
     .msg { max-width: 760px; margin: 0 auto 14px; display: flex; gap: 10px; }
     .msg .who { font-size: 12px; color: var(--muted); width: 52px; flex: none; padding-top: 8px; }
@@ -103,6 +121,7 @@
     <h1>ROS2 Copilot</h1>
     <button id="wikiBtn" type="button" title="실행 중인 ROS2 시스템 문서">🗂 시스템 위키</button>
     <button id="transcriptBtn" type="button" title="기록된 에이전트 대화 열람">📜 기록</button>
+    <button id="statusBtn" type="button" title="실행 중인 시스템의 실시간 상태">📊 상태</button>
     <button id="reset" type="button" title="대화 기록 초기화">새 대화</button>
   </header>
 
@@ -127,6 +146,15 @@
       <button id="transcriptClose" type="button">← 채팅으로</button>
     </div>
     <div id="transcriptBody"></div>
+  </div>
+
+  <div id="status" hidden>
+    <div class="wiki-head">
+      <strong>실시간 상태 — 실행 중인 시스템 헬스</strong>
+      <button id="statusRefresh" type="button">↻ 새로고침</button>
+      <button id="statusClose" type="button">← 채팅으로</button>
+    </div>
+    <div id="statusBody"></div>
   </div>
 
   <form id="form">
@@ -252,16 +280,29 @@
     const transcriptPanel = document.getElementById('transcripts');
     const transcriptBody = document.getElementById('transcriptBody');
     const transcriptClose = document.getElementById('transcriptClose');
+    const statusBtn = document.getElementById('statusBtn');
+    const statusPanel = document.getElementById('status');
+    const statusBody = document.getElementById('statusBody');
+    const statusRefresh = document.getElementById('statusRefresh');
+    const statusClose = document.getElementById('statusClose');
 
+    let statusTimer = null;
+    function stopStatusTimer() {
+      if (statusTimer) { clearInterval(statusTimer); statusTimer = null; }
+    }
     function hidePanels() {
       wikiPanel.hidden = true;
       transcriptPanel.hidden = true;
+      statusPanel.hidden = true;
+      stopStatusTimer();  // stop polling when leaving the status view
     }
     function showChat() { hidePanels(); log.hidden = false; form.hidden = false; }
     function showWiki() { hidePanels(); log.hidden = true; form.hidden = true; wikiPanel.hidden = false; }
     function showTranscripts() { hidePanels(); log.hidden = true; form.hidden = true; transcriptPanel.hidden = false; }
+    function showStatus() { hidePanels(); log.hidden = true; form.hidden = true; statusPanel.hidden = false; }
     wikiClose.addEventListener('click', showChat);
     transcriptClose.addEventListener('click', showChat);
+    statusClose.addEventListener('click', showChat);
 
     wikiBtn.addEventListener('click', async () => {
       showWiki();
@@ -433,6 +474,99 @@
         }
         transcriptBody.appendChild(card);
       }
+    }
+
+    // ---- Live status panel (auto-refreshes while open) ----
+    async function loadStatus() {
+      try {
+        const res = await fetch('/api/status');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        renderStatus(await res.json());
+      } catch (e) {
+        statusBody.innerHTML = '<div class="scard">오류: ' + e.message
+          + ' — ROS2 노드가 실행 중인지 확인하세요.</div>';
+      }
+    }
+    statusBtn.addEventListener('click', () => {
+      showStatus();
+      statusBody.innerHTML = '<div class="scard">측정 중… (약 2초)</div>';
+      loadStatus();
+      stopStatusTimer();
+      statusTimer = setInterval(loadStatus, 4000);  // live refresh while open
+    });
+    statusRefresh.addEventListener('click', loadStatus);
+
+    function statRow(k, v) {
+      return '<div class="stat"><span class="k">' + k + '</span>'
+        + '<span class="v">' + v + '</span></div>';
+    }
+    function pill(state, text) {
+      // state: 'ok' | 'bad' | 'warn' | '' (unknown)
+      return '<span class="pill"><span class="led ' + state + '"></span>' + text + '</span>';
+    }
+    function esc(s) {
+      return String(s).replace(/[&<>]/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    }
+
+    function renderStatus(d) {
+      const cards = [];
+
+      // Nodes
+      const nn = (d.nodes && d.nodes.names) || [];
+      cards.push('<div class="scard"><h3>노드</h3>'
+        + statRow('활성 노드', (d.nodes ? d.nodes.count : 0) + '개')
+        + (nn.length ? statRow('목록', esc(nn.join(', '))) : '')
+        + '</div>');
+
+      // Safety + robot
+      let safety = '<div class="scard"><h3>안전 · 로봇</h3>';
+      if (d.estop == null) {
+        safety += statRow('E-stop', pill('', '알 수 없음 (/copilot/estop 없음)'));
+      } else if (d.estop.engaged) {
+        safety += statRow('E-stop', pill('bad', '작동됨 — 모션 차단'));
+      } else {
+        safety += statRow('E-stop', pill('ok', '정상'));
+      }
+      if (d.robot) {
+        safety += statRow('위치', 'x=' + d.robot.x + '  y=' + d.robot.y
+          + '  yaw=' + d.robot.yaw + ' rad');
+      } else {
+        safety += statRow('위치', pill('', '오도메트리 없음 (/odom)'));
+      }
+      safety += '</div>';
+      cards.push(safety);
+
+      // Services / action
+      const sv = d.services || {};
+      cards.push('<div class="scard"><h3>서비스 · 액션</h3>'
+        + statRow('RAG 질의', sv.rag ? pill('ok', '연결됨') : pill('bad', '없음'))
+        + statRow('실행기 액션', sv.executor_action ? pill('ok', '연결됨') : pill('bad', '없음'))
+        + '</div>');
+
+      // Topic rates
+      const topics = d.topics || [];
+      let hz = '<div class="scard"><h3>토픽 발행 주기 (Hz)</h3>';
+      if (!topics.length) {
+        hz += '<div class="stat"><span class="v">모니터링 대상 토픽이 없습니다.</span></div>';
+      } else {
+        const max = Math.max(1, ...topics.map((t) => t.hz));
+        for (const t of topics) {
+          const pct = Math.round((t.hz / max) * 100);
+          const led = t.hz > 0 ? 'ok' : 'warn';
+          hz += '<div class="hzrow"><span class="name">'
+            + '<span class="pill"><span class="led ' + led + '"></span></span> ' + esc(t.name)
+            + '</span><span class="hzbar"><span style="width:' + pct + '%"></span></span>'
+            + '<span class="hz">' + t.hz.toFixed(1) + ' Hz</span></div>';
+        }
+      }
+      hz += '</div>';
+      cards.push(hz);
+
+      const meta = '<div class="status-meta">' + d.window_sec
+        + '초 측정 · 4초마다 자동 새로고침 · ' + new Date().toLocaleTimeString()
+        + '</div>';
+      statusBody.innerHTML = meta + cards.join('');
     }
 
     form.addEventListener('submit', async (e) => {

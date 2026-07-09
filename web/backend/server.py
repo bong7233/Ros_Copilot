@@ -131,6 +131,100 @@ async def wiki_describe(node: str):
     return await asyncio.get_event_loop().run_in_executor(None, work)
 
 
+# ---- Live system status: runtime health of the running ROS2 system ----
+
+# Health-relevant topics we measure a publish rate (Hz) for, when present.
+_STATUS_TOPICS = ["/odom", "/scan", "/cmd_vel", "/copilot/estop", "/tf", "/map"]
+
+
+def _collect_status(window_sec: float = 2.0) -> dict:
+    """Sample the live system for a short window and summarize its health.
+
+    Complements the wiki (static structure) with *runtime* signals: which
+    nodes are alive, how fast key topics publish (Hz), the e-stop state, the
+    robot pose, and whether the RAG service / executor action are reachable.
+    """
+    from rosidl_runtime_py.utilities import get_message
+    from copilot_agent import config as acfg
+    from copilot_agent.ros_bridge import _yaw_from_quat
+
+    node = rclpy.create_node(f"web_status_{uuid.uuid4().hex[:8]}")
+    counts: dict = {}
+    latest: dict = {}
+    subs = []
+    try:
+        topics = dict(node.get_topic_names_and_types())
+        services = dict(node.get_service_names_and_types())
+
+        def make_cb(name):
+            def cb(msg):
+                counts[name] = counts.get(name, 0) + 1
+                latest[name] = msg
+            return cb
+
+        for tname in _STATUS_TOPICS:
+            types = topics.get(tname)
+            if not types:
+                continue
+            try:
+                msg_cls = get_message(types[0])
+            except Exception:  # noqa: BLE001 - unknown/uninstalled type
+                continue
+            counts[tname] = 0
+            subs.append(node.create_subscription(
+                msg_cls, tname, make_cb(tname), 10))
+
+        deadline = time.time() + window_sec
+        while time.time() < deadline:
+            rclpy.spin_once(node, timeout_sec=0.05)
+
+        topics_out = []
+        for tname in _STATUS_TOPICS:
+            if tname not in counts:
+                continue
+            topics_out.append({
+                "name": tname,
+                "hz": round(counts[tname] / window_sec, 1),
+                "type": topics.get(tname, ["?"])[0],
+            })
+
+        robot = None
+        if "/odom" in latest:
+            p = latest["/odom"].pose.pose
+            robot = {"x": round(p.position.x, 3), "y": round(p.position.y, 3),
+                     "yaw": round(_yaw_from_quat(p.orientation), 3)}
+
+        estop = None
+        if "/copilot/estop" in latest:
+            estop = {"engaged": bool(latest["/copilot/estop"].data)}
+
+        names = sorted(n for n, _ in node.get_node_names_and_namespaces()
+                       if n != node.get_name())
+
+        return {
+            "nodes": {"count": len(names), "names": names},
+            "robot": robot,
+            "estop": estop,
+            "topics": topics_out,
+            "services": {
+                "rag": acfg.RAG_SERVICE in services,
+                "executor_action": any(
+                    s.startswith(acfg.EXECUTE_ACTION) for s in services),
+            },
+            "window_sec": window_sec,
+        }
+    finally:
+        for s in subs:
+            node.destroy_subscription(s)
+        node.destroy_node()
+
+
+@app.get("/api/status")
+async def status():
+    """Live runtime health snapshot (nodes, topic Hz, e-stop, pose, services)."""
+    return await asyncio.get_event_loop().run_in_executor(None, _collect_status)
+
+
 # ---- Transcripts: browse past agent interactions (if logging is enabled) ----
 
 @app.get("/api/transcripts")
