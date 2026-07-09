@@ -19,6 +19,8 @@ import asyncio
 import json
 import os
 import threading
+import time
+import uuid
 from contextlib import asynccontextmanager
 
 import rclpy
@@ -86,6 +88,47 @@ async def ask_stream(req: AskRequest):
             yield f"data: {json.dumps(event)}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+# ---- LLM Wiki: introspect the live ROS2 graph and (optionally) describe it ----
+
+def _collect_graph() -> dict:
+    """Spin a short-lived node to introspect the ROS2 graph (no LLM)."""
+    from copilot_wiki.introspect import collect_graph
+    node = rclpy.create_node(f"web_wiki_{uuid.uuid4().hex[:8]}")
+    try:
+        deadline = time.time() + 2.0
+        while time.time() < deadline:
+            rclpy.spin_once(node, timeout_sec=0.1)
+        return collect_graph(node)
+    finally:
+        node.destroy_node()
+
+
+@app.get("/api/wiki")
+async def wiki():
+    """Live system structure: nodes + their interfaces + a mermaid diagram."""
+    def work():
+        from copilot_wiki.wiki_gen import build_mermaid
+        graph = _collect_graph()
+        return {"nodes": graph["nodes"], "mermaid": build_mermaid(graph)}
+    return await asyncio.get_event_loop().run_in_executor(None, work)
+
+
+@app.get("/api/wiki/describe")
+async def wiki_describe(node: str):
+    """On-demand: LLM-written, grounded description of one node."""
+    def work():
+        from copilot_wiki import config as wcfg
+        from copilot_wiki.wiki_gen import describe_node
+        import anthropic
+        graph = _collect_graph()
+        info = graph["nodes"].get(node)
+        if not info:
+            return {"description": "(node not found on the graph)"}
+        client = anthropic.Anthropic()
+        return {"description": describe_node(client, node, info, wcfg.MODEL)}
+    return await asyncio.get_event_loop().run_in_executor(None, work)
 
 
 # Serve the static chat UI. Mounted last so /api/* routes take precedence.

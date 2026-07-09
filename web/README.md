@@ -40,11 +40,21 @@ answer. Conversation is
 **multi-turn**: the browser keeps the prior turns and sends them as context, so
 you can say "그럼 거기로 가" after asking about a place. "새 대화" clears it.
 
+Click **🗂 시스템 위키** to browse the live system wiki: the server introspects
+the running ROS2 graph and shows one card per node with what it **publishes**,
+**subscribes** to, and the **services** it offers — the same ground-truth facts
+`copilot_wiki` builds its docs from. Hit **🤖 AI 설명 생성** on any node to get an
+LLM-written, grounded description of that node on demand. If no nodes are
+running, the panel says so instead of inventing them.
+
 ## Endpoints
 
 - `POST /api/ask` → `{reply}` (blocking, simple)
 - `POST /api/ask/stream` → Server-Sent Events: `tool_call` / `tool_result` /
   `usage` / `final` (used by the chat UI)
+- `GET /api/wiki` → `{nodes, mermaid}` — the live ROS2 graph (no LLM)
+- `GET /api/wiki/describe?node=<name>` → `{description}` — an LLM-written,
+  grounded description of one node (on demand)
 
 ## Design notes
 
